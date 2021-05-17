@@ -44,11 +44,12 @@ parts:
     source-tag: v5.0
     override-build: |
       make all
-      mkdir -p $SNAPCRAFT_PART_INSTALL/bin  $SNAPCRAFT_PART_INSTALL/var/www/public_html/data/
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin  $SNAPCRAFT_PART_INSTALL/var/www/public_html/data/ $SNAPCRAFT_PART_INSTALL/var/www/public_html/skyaware/
       cp dump1090                           $SNAPCRAFT_PART_INSTALL/bin
       cp view1090                           $SNAPCRAFT_PART_INSTALL/bin
       cp starch-benchmark                   $SNAPCRAFT_PART_INSTALL/bin
       cp -R public_html/*                   $SNAPCRAFT_PART_INSTALL/var/www/public_html/
+      cp -R public_html_merged/*            $SNAPCRAFT_PART_INSTALL/var/www/public_html/skyaware/
     build-packages:
       - librtlsdr-dev
       - libhackrf-dev
