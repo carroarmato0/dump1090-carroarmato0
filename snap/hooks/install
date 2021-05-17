@@ -1,0 +1,4 @@
+#!/bin/sh -e
+echo "Copying WebApp to RW directory"
+cp -R $SNAP/var/www/* $SNAP_COMMON/
+chmod 777 -R $SNAP_COMMON/*

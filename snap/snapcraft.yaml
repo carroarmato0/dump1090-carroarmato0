@@ -1,0 +1,72 @@
+name: dump1090-carroarmato0 # you probably want to 'snapcraft register <name>'
+base: core18 # the base snap is the execution environment for this snap
+version: 'v5.0' # just for humans, typically '1.2+git' or '1.3.2'
+summary: Mode S decoder from Flightaware. # 79 char long summary
+description: |
+  dump1090 is a ADS-B, Mode S, and Mode 3A/3C demodulator and decoder that will receive and decode aircraft transponder messages received via a directly connected software defined radio, or from data provided over a network connection.
+
+  After installation, allow it to access the SDR dongle by issuing the following command:
+    sudo snap connect dump1090-carroarmato0:raw-usb
+
+  How to use:
+    dump1090-carroarmato0.dump1090  - Start capturing and decoding messages
+    dump1090-carroarmato0.webserver - Start a webserver to view the aircrafts on a map in your browser
+
+  dump1090 is automatically configured to write the json files on disk, and the webserver automatically set to read them from the correct location.
+
+# architectures:
+#   - build-on: amd64
+#   - build-on: i386
+#   - build-on: ppc64el
+
+grade: stable # must be 'stable' to release into candidate/stable channels
+confinement: strict # use 'strict' once you have the right plugs and slots
+
+apps:
+  dump1090:
+    command: bin/dump1090 --write-json ${SNAP_COMMON}/public_html/data/
+    plugs: [network-bind, home, raw-usb]
+  view1090:
+    command: bin/view1090
+    plugs: [network]
+  starch-benchmark:
+    command: bin/starch-benchmark
+    plugs: []
+  webserver:
+    command: python3.8 -m http.server --directory ${SNAP_COMMON}/public_html/
+    plugs: [network-bind, home]
+
+
+parts:
+  dump1090:
+    plugin: make
+    source: https://github.com/flightaware/dump1090.git
+    source-tag: v5.0
+    override-build: |
+      make all
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin  $SNAPCRAFT_PART_INSTALL/var/www/public_html/data/
+      cp dump1090                           $SNAPCRAFT_PART_INSTALL/bin
+      cp view1090                           $SNAPCRAFT_PART_INSTALL/bin
+      cp starch-benchmark                   $SNAPCRAFT_PART_INSTALL/bin
+      cp -R public_html/*                   $SNAPCRAFT_PART_INSTALL/var/www/public_html/
+    build-packages:
+      - librtlsdr-dev
+      - libhackrf-dev
+      - libbladerf-dev
+      - liblimesuite-dev
+      - libncurses5-dev
+      - libncursesw5-dev
+      - pkg-config
+      - dh-systemd
+    stage-packages:
+      - librtlsdr0
+      - libbladerf1
+      - libhackrf0
+      - libusb-1.0-0
+      - python3.8
+
+hooks:
+  install:
+    plugs: [home]
+  post-refresh:
+    plugs: [home]
